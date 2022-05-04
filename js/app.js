@@ -153,6 +153,12 @@ game = {
     },
   ],
   usedCards: [],
+  scores: [
+    {
+      userPoints: 0,
+      computerPoints: 0,
+    },
+  ],
   // Human & Computer points & rounds won, respectively
   roundCount: 0,
   // dealCards()
@@ -169,10 +175,11 @@ game = {
       return;
     }
   },
-  randomNumber(arrayProperty){
-    // NOTE - Arrays only as arguments.
-    return Math.floor(Math.random() * (((arrayProperty.length - 1) - 0 + 1) + 0));
-  },
+  // NOTE - Appears I haven't used 'randomNumber' method anywhere yet.
+  // randomNumber(arrayProperty){
+  //   // NOTE - Arrays only as arguments.
+  //   return Math.floor(Math.random() * (((arrayProperty.length - 1) - 0 + 1) + 0));
+  // },
   increaseRound(){
     game.roundCount += 1;
   },
@@ -213,6 +220,7 @@ game = {
       console.log(computerCard);
       console.log(`[================ ${user.name.toUpperCase()}'S CARD ================]`);
       console.log(playerCardChoice);
+      game.updatePoints('computer');
     } else {
       console.log(`The player's Pokemon scores more damage!`)
       console.log(`[================ COMPUTER'S CARD ================]`);
@@ -221,9 +229,33 @@ game = {
         `[================ ${user.name.toUpperCase()}'S CARD ================]`
       );
       console.log(playerCardChoice); // REVIEW - Used the 'find' method to return single object, not a single object within an array.
+      game.updatePoints('user');
     }
   },
-  displayBattle(){} // NOTE - may not need this method.
+  updatePoints(nameOfWinner){
+    if (nameOfWinner === 'user') {
+      user.points += 1;
+      game.scores[0].userPoints += 1;
+    } else if (nameOfWinner === 'computer') {
+      computer.points += 1;
+      game.scores[0].computerPoints += 1;
+    }
+  },
+  endOfRound(){
+    if (game.scores[0].userPoints > game.scores[0].computerPoints) {
+      user.rounds += 1;
+      console.log(`[================ ROUND WINNER ================]`);
+      console.log('User has won this round!');
+    } else {
+      computer.rounds += 1;
+      console.log(`[================ ROUND WINNER ================]`);
+      console.log("Computer has won this round!");
+    } 
+    game.scores[0].userPoints = 0;
+    game.scores[0].computerPoints = 0;
+    game.roundCount += 1;
+    return
+  },
 };
 
 

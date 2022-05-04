@@ -3,6 +3,52 @@
 let user;
 let computer;
 
+class Player {
+  points = 0;
+  rounds = 0;
+  dealtCards = [];
+  usedCards = [];
+  constructor(name){
+    this.name = name;
+  }
+  sayHi(){
+    console.log(`Hello, my name is ${this.name}.`);
+  }
+  userCardChoice(){
+    // NOTE - future safeguard, regex to check that user input is one of the names on their dealt cards.
+    console.log(`[================ AVAILABLE POKEMON ================]`);
+    for (let a = 0; a < this.dealtCards.length; a++) {
+      console.log(this.dealtCards[a]);
+    }
+    let userInput = prompt('Enter the name of the Pokemon you would like to play:');
+
+    let match = this.dealtCards.find(dealtCards => dealtCards.name === userInput);
+    if (match) {
+      // TODO - Revise, currently throws error because card is being spliced before value can be returned(?)
+      for (let a = 0; a < this.dealtCards.length; a++) {
+        if (match.name === this.dealtCards[a].name) {
+          this.dealtCards.splice(a, 1);
+        }
+      }
+      return match;
+    } else {
+      return false;
+    }
+  }
+}
+
+class Computer extends Player {
+  constructor(name){
+    super(name);
+  }
+  computerCardChoice(){
+    let index = Math.floor(Math.random() * ((this.dealtCards.length - 1) - 0 + 1) + 0);
+    let cardChoice = this.dealtCards[index];
+    this.dealtCards.splice(index, 1);
+    return cardChoice;
+  }
+}
+
 game = {
   cardLibrary: [
     {
@@ -159,27 +205,26 @@ game = {
       computerPoints: 0,
     },
   ],
-  // Human & Computer points & rounds won, respectively
   roundCount: 0,
-  // dealCards()
-  //
-  play() {
+  start() {
     const promptResponse = prompt("Ready to play?").toLowerCase();
     if (promptResponse.match(/yes/)) {
       user = new Player(prompt("What is your name?"));
       computer = new Computer('The Borg');
-      // console.log("This is when the game would play!");
-      game.dealCards();
+      game.play();
+      game.endOfGame();
     } else {
-      console.log("Not recognized as a response.");
-      return;
+      console.log("Not recognized as a response, try again.");
+      return setTimeout(() => {game.start();}, 2000);
     }
   },
-  // NOTE - Appears I haven't used 'randomNumber' method anywhere yet.
-  // randomNumber(arrayProperty){
-  //   // NOTE - Arrays only as arguments.
-  //   return Math.floor(Math.random() * (((arrayProperty.length - 1) - 0 + 1) + 0));
-  // },
+  play() {
+    for (let a = 0; a < 3; a++) {
+      game.dealCards();
+      game.battle();
+      game.endOfRound();
+    }
+  },
   increaseRound(){
     game.roundCount += 1;
   },
@@ -212,24 +257,26 @@ game = {
     console.log(`[================================]`);
   },
   battle(){
-    let playerCardChoice = user.userCardChoice();
-    let computerCard = computer.computerCardChoice();
-    if (computerCard.damage > playerCardChoice.damage) {
-      console.log(`The computer's Pokemon scores more damage!`);
-      console.log(`[================ COMPUTER'S CARD ================]`);
-      console.log(computerCard);
-      console.log(`[================ ${user.name.toUpperCase()}'S CARD ================]`);
-      console.log(playerCardChoice);
-      game.updatePoints('computer');
-    } else {
-      console.log(`The player's Pokemon scores more damage!`)
-      console.log(`[================ COMPUTER'S CARD ================]`);
-      console.log(computerCard);
-      console.log(
-        `[================ ${user.name.toUpperCase()}'S CARD ================]`
-      );
-      console.log(playerCardChoice); // REVIEW - Used the 'find' method to return single object, not a single object within an array.
-      game.updatePoints('user');
+    for (let a = 0; a < 3; a++) {
+      let playerCardChoice = user.userCardChoice();
+      let computerCard = computer.computerCardChoice();
+      if (computerCard.damage > playerCardChoice.damage) {
+        console.log(`The computer's Pokemon scores more damage!`);
+        console.log(`[================ COMPUTER'S CARD ================]`);
+        console.log(computerCard);
+        console.log(`[================ ${user.name.toUpperCase()}'S CARD ================]`);
+        console.log(playerCardChoice);
+        game.updatePoints('computer');
+      } else {
+        console.log(`The player's Pokemon scores more damage!`)
+        console.log(`[================ COMPUTER'S CARD ================]`);
+        console.log(computerCard);
+        console.log(
+          `[================ ${user.name.toUpperCase()}'S CARD ================]`
+        );
+        console.log(playerCardChoice); // REVIEW - Used the 'find' method to return single object, not a single object within an array.
+        game.updatePoints('user');
+      }
     }
   },
   updatePoints(nameOfWinner){
@@ -256,55 +303,15 @@ game = {
     game.roundCount += 1;
     return
   },
+  endOfGame(){
+    if (user.rounds > computer.rounds) {
+      console.log(`[================ END OF GAME ================]`);
+      console.log('User won the game, congratulations!');
+    } else {
+      console.log(`[================ END OF GAME ================]`);
+      console.log('Resistance is futile. The Borg have won.');
+    }
+  }
 };
 
-
-
-class Player {
-  points = 0;
-  rounds = 0;
-  dealtCards = [];
-  usedCards = [];
-  constructor(name){
-    this.name = name;
-  }
-  sayHi(){
-    console.log(`Hello, my name is ${this.name}.`);
-  }
-  userCardChoice(){
-    // NOTE - future safeguard, regex to check that user input is one of the names on their dealt cards.
-    for (let a = 0; a < this.dealtCards.length; a++) {
-      console.log(this.dealtCards[a]);
-    }
-    let userInput = prompt('Enter the name of the Pokemon you would like to play:');
-
-    let match = this.dealtCards.find(dealtCards => dealtCards.name === userInput);
-    if (match) {
-      // TODO - Revise, currently throws error because card is being spliced before value can be returned(?)
-      for (let a = 0; a < this.dealtCards.length; a++) {
-        if (match.name === this.dealtCards[a].name) {
-          this.dealtCards.splice(a, 1);
-        }
-      }
-      return match;
-    } else {
-      return false;
-    }
-  }
-}
-
-
-
-class Computer extends Player {
-  constructor(name){
-    super(name);
-  }
-  computerCardChoice(){
-    let index = Math.floor(Math.random() * ((this.dealtCards.length - 1) - 0 + 1) + 0);
-    let cardChoice = this.dealtCards[index];
-    this.dealtCards.splice(index, 1);
-    return cardChoice;
-  }
-}
-
-game.play();
+game.start();

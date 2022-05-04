@@ -220,7 +220,7 @@ game = {
       console.log(
         `[================ ${user.name.toUpperCase()}'S CARD ================]`
       );
-      console.log(playerCardChoice[0]);
+      console.log(playerCardChoice); // REVIEW - Used the 'find' method to return single object, not a single object within an array.
     }
   },
   displayBattle(){} // NOTE - may not need this method.
@@ -245,11 +245,18 @@ class Player {
       console.log(this.dealtCards[a]);
     }
     let userInput = prompt('Enter the name of the Pokemon you would like to play:');
-    let cardMatch = this.dealtCards.filter(dealtCards => dealtCards.name === userInput);
-    if (cardMatch.length > 0) {
-      return cardMatch;
+
+    let match = this.dealtCards.find(dealtCards => dealtCards.name === userInput);
+    if (match) {
+      // TODO - Revise, currently throws error because card is being spliced before value can be returned(?)
+      for (let a = 0; a < this.dealtCards.length; a++) {
+        if (match.name === this.dealtCards[a].name) {
+          this.dealtCards.splice(a, 1);
+        }
+      }
+      return match;
     } else {
-      return console.log('No match!');
+      return false;
     }
   }
 }
